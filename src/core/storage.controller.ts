@@ -21,6 +21,9 @@ export class StorageController {
   }
 
   set(key: string, value: any): boolean {
+    if (!key) {
+      return false;
+    }
     try {
       this.storage.setItem(this.deriveKey(key), JSON.stringify(value));
       this.notifyAction('set', key, value);
@@ -33,7 +36,11 @@ export class StorageController {
 
   remove(key: string): boolean {
     try {
-      this.storage.removeItem(this.deriveKey(key));
+      const fullKey = this.deriveKey(key);
+      if (!this.storage.getItem(fullKey) != null) {
+        return false;
+      }
+      this.storage.removeItem(fullKey);
       this.notifyAction('remove', key);
     } catch (e) {
       this.errors.next({code: 500, message: e.message});

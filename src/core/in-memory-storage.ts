@@ -5,15 +5,24 @@
 
 export class InMemoryStorage implements Storage {
 
-  length = 0;
+  private _length = 0;
   private buffer: any = {};
 
+  get length(): number {
+    return this._length;
+  }
+
   clear(): void {
-    this.buffer = {};
+    for (const key in this.buffer) {
+      this.removeItem(key);
+    }
   }
 
   getItem(key: string): string | any {
-    return this.buffer[key];
+    if (this.buffer.hasOwnProperty(key)) {
+      return this.buffer[key];
+    }
+    return null;
   }
 
   key(index: number): string | any {
@@ -21,15 +30,15 @@ export class InMemoryStorage implements Storage {
   }
 
   removeItem(key: string): void {
-    if (this.buffer[key]) {
+    if (this.buffer.hasOwnProperty(key)) {
       delete this.buffer[key];
-      this.length--;
+      this._length--;
     }
   }
 
   setItem(key: string, data: string): void {
-    if (!this.buffer[key]) {
-      this.length++;
+    if (!this.buffer.hasOwnProperty(key)) {
+      this._length++;
     }
     this.buffer[key] = data;
   }
