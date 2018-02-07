@@ -37,7 +37,7 @@ export class StorageController {
   remove(key: string): boolean {
     try {
       const fullKey = this.deriveKey(key);
-      if (!this.storage.getItem(fullKey) != null) {
+      if (this.storage.getItem(fullKey) === null) {
         return false;
       }
       this.storage.removeItem(fullKey);
