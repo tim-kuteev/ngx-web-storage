@@ -46,6 +46,10 @@ export class MyComponent implements OnInit {
 }
 ```
 
+## Demo
+
+**[Try interactive demo on stackblitz](https://stackblitz.com/edit/ngx-web-storage?embed=1&file=app/app.component.ts)**
+
 ## Advanced
 
 You can use both storage. **session** (get cleared when the page session ends) and **local** (has no expiration time).
