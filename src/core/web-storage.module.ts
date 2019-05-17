@@ -1,9 +1,7 @@
 import { ModuleWithProviders, NgModule, Optional, SkipSelf } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { WebStorageConfig } from './web-storage.config';
+import { WEB_STORAGE_CONFIG, WebStorageConfig } from './web-storage.config';
 import { WebStorageService } from './web-storage.service';
-
-const defaultConfig = <WebStorageConfig>{prefix: 'NG'};
 
 @NgModule({
   imports: [
@@ -21,11 +19,11 @@ export class WebStorageModule {
     }
   }
 
-  static forRoot(config = defaultConfig): ModuleWithProviders {
+  static forRoot(config: WebStorageConfig = {prefix: 'NG_'}): ModuleWithProviders {
     return {
       ngModule: WebStorageModule,
       providers: [
-        {provide: WebStorageConfig, useValue: config}
+        {provide: WEB_STORAGE_CONFIG, useValue: config}
       ]
     };
   }

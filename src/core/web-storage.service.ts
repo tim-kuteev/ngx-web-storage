@@ -1,83 +1,40 @@
-import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs/Observable';
-import { StorageController } from './storage.controller';
-import { InMemoryStorage } from './in-memory-storage';
-import { WebStorageConfig } from './web-storage.config';
-import { WebStorageItemAction, WebStorageServiceError } from './interface';
-import 'rxjs/add/observable/merge';
+import { Inject, Injectable } from '@angular/core';
+import { merge, Observable } from 'rxjs';
+import { WebStorageController } from './storage.controller';
+import { WEB_STORAGE_CONFIG, WebStorageConfig } from './web-storage.config';
 
-class Errors {
-  public static readonly SESSION_UNSUPPORTED = <WebStorageServiceError>{
-    code: 1,
-    message: 'Session storage unsupported, the storage is running in memory'
-  };
-  public static readonly LOCAL_UNSUPPORTED = <WebStorageServiceError>{
-    code: 2,
-    message: 'Local storage unsupported, the storage is running in memory'
-  };
-  public static readonly LOCAL_UNSUPPORTED_SESSION = <WebStorageServiceError>{
-    code: 3,
-    message: 'Local storage unsupported, session storage is set as local'
-  };
+export interface WebStorageItemAction {
+  action: string;
+  key: string;
+  value?: any;
 }
 
 @Injectable()
 export class WebStorageService {
 
-  session: StorageController;
-  local: StorageController;
-  actions: Subject<WebStorageItemAction> = new Subject<WebStorageItemAction>();
-  errors: Subject<WebStorageServiceError> = new Subject<WebStorageServiceError>();
-  private _supported: boolean;
-  private prefix: string;
+  private _session: WebStorageController;
+  private _local: WebStorageController;
 
-  constructor(config: WebStorageConfig) {
-    this.prefix = `${config.prefix}_`;
-    this.setup();
+  constructor(
+      @Inject(WEB_STORAGE_CONFIG) private _config: WebStorageConfig,
+  ) {
+    this._session = new WebStorageController('sessionStorage', this._config.prefix);
+    this._local = new WebStorageController('localStorage', this._config.prefix);
   }
 
-  get supported(): boolean {
-    return this._supported;
+  get session(): WebStorageController {
+    return this._session;
   }
 
-  private setup() {
-    if (this.checkStorage('sessionStorage')) {
-      this._supported = true;
-      this.session = new StorageController(window.sessionStorage, this.prefix);
-    } else {
-      this._supported = false;
-      this.session = new StorageController(new InMemoryStorage());
-      this.errors.next(Errors.SESSION_UNSUPPORTED);
-    }
-    if (this.checkStorage('localStorage')) {
-      this.local = new StorageController(window.localStorage, this.prefix);
-    } else if (this._supported) {
-      this.local = new StorageController(window.sessionStorage, `${this.prefix}LOCAL_`);
-      this.errors.next(Errors.LOCAL_UNSUPPORTED_SESSION);
-    } else {
-      this.local = new StorageController(new InMemoryStorage());
-      this.errors.next(Errors.LOCAL_UNSUPPORTED);
-    }
-
-    Observable.merge(this.session.errors, this.local.errors)
-        .subscribe(err => this.errors.next(err));
-    Observable.merge(this.session.actions, this.local.actions)
-        .subscribe(change => this.actions.next(change));
+  get local(): WebStorageController {
+    return this._local;
   }
 
-  private checkStorage(storageType: 'sessionStorage' | 'localStorage'): boolean {
-    try {
-      if (storageType in window && window[storageType] !== null) {
-        const webStorage = window[storageType];
-        const key = `${this.prefix}__DUMMY`;
-        webStorage.setItem(key, '');
-        webStorage.removeItem(key);
-        return true;
-      }
-    } catch (e) {
-      this.errors.next({code: 500, message: e.message});
-    }
-    return false;
+  get actions(): Observable<WebStorageItemAction> {
+    return merge(this._session.actions, this._local.actions);
+  }
+
+  get errors(): Observable<any> {
+    return merge(this._session.errors, this._local.errors);
   }
 }

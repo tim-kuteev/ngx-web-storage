@@ -1,34 +1,48 @@
-import { Subject } from 'rxjs/Subject';
-import { WebStorageItemAction, WebStorageServiceError } from './interface';
+import { Observable, Subject } from 'rxjs';
+import { WebStorageItemAction } from './web-storage.service';
+import { WebStorage } from './web-storage';
 
-export class StorageController {
+export class WebStorageController extends WebStorage {
 
-  actions: Subject<WebStorageItemAction> = new Subject<WebStorageItemAction>();
-  errors: Subject<WebStorageServiceError> = new Subject<WebStorageServiceError>();
+  private _actions: Subject<WebStorageItemAction> = new Subject<WebStorageItemAction>();
+  private _errors: Subject<any> = new Subject<any>();
 
   constructor(
-      private storage: Storage,
-      private prefix = '') {
+      storageType: 'sessionStorage' | 'localStorage',
+      prefix = '',
+  ) {
+    super(storageType, prefix);
   }
 
-  get<T>(key: string): T | null {
+  get actions(): Observable<WebStorageItemAction> {
+    return this._actions.asObservable();
+  }
+
+  get errors(): Observable<any> {
+    return this._errors.asObservable();
+  }
+
+  get(key: string): any {
     try {
-      const item = this.storage.getItem(this.deriveKey(key));
-      return JSON.parse(item as string);
+      return super.get(key);
     } catch (e) {
+      this._errors.next(e);
       return null;
     }
   }
 
   set(key: string, value: any): boolean {
-    if (!key) {
-      return false;
-    }
     try {
-      this.storage.setItem(this.deriveKey(key), JSON.stringify(value));
-      this.notifyAction('set', key, value);
+      const success = super.set(key, value);
+      if (success) {
+        this._actions.next({
+          action: 'set',
+          key: key,
+          value: value,
+        });
+      }
     } catch (e) {
-      this.errors.next({code: 500, message: e.message});
+      this._errors.next(e);
       return false;
     }
     return true;
@@ -36,37 +50,25 @@ export class StorageController {
 
   remove(key: string): boolean {
     try {
-      const fullKey = this.deriveKey(key);
-      if (this.storage.getItem(fullKey) === null) {
-        return false;
+      const success = super.remove(key);
+      if (success) {
+        this._actions.next({
+          action: 'remove',
+          key: key,
+        });
       }
-      this.storage.removeItem(fullKey);
-      this.notifyAction('remove', key);
     } catch (e) {
-      this.errors.next({code: 500, message: e.message});
+      this._errors.next(e);
       return false;
     }
     return true;
   }
 
-  clear(): boolean {
-    for (const key in this.storage) {
-      if (key.indexOf(this.prefix) === 0 && !this.remove(key.substr(this.prefix.length))) {
-        return false;
-      }
+  clear(): void {
+    try {
+      super.clear();
+    } catch (e) {
+      this._errors.next(e);
     }
-    return true;
-  }
-
-  private deriveKey(key: string): string {
-    return `${this.prefix}${key}`;
-  }
-
-  private notifyAction(action: string, key: string, value?: any) {
-    this.actions.next({
-      action: action,
-      key: key,
-      value: value,
-    });
   }
 }

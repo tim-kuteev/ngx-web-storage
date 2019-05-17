@@ -2,7 +2,6 @@
  * A dummy storage that is used to store data in memory if local/session storage is not supported to
  * avoid errors. The data stored in InMemoryStorage gets cleared when the page is closed or reloaded.
  * */
-
 export class InMemoryStorage implements Storage {
 
   private _length = 0;
