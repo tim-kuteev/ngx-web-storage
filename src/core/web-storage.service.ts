@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { merge, Observable } from 'rxjs';
-import { WebStorageController } from './storage.controller';
-import { WEB_STORAGE_CONFIG, WebStorageConfig } from './web-storage.config';
+import { WebStorageController } from './web-storage.controller';
+import { WEB_STORAGE_CONFIG, WebStorageConfig } from '../web-storage.config';
 
 export interface WebStorageItemAction {
   action: string;

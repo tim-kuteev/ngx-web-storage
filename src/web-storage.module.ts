@@ -1,7 +1,7 @@
 import { ModuleWithProviders, NgModule, Optional, SkipSelf } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WEB_STORAGE_CONFIG, WebStorageConfig } from './web-storage.config';
-import { WebStorageService } from './web-storage.service';
+import { WebStorageService } from './core/web-storage.service';
 
 @NgModule({
   imports: [
