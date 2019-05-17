@@ -6,7 +6,7 @@ export class WebStorage {
 
   constructor(
       protected _storageType: 'sessionStorage' | 'localStorage',
-      protected _prefix,
+      protected _prefix = '',
   ) {
     if (this._isSupported()) {
       this._storage = window[this._storageType];
