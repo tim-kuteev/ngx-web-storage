@@ -1,4 +1,5 @@
 import { InMemoryStorage } from './in-memory-storage';
+import { KeyUtility } from '../web-storage.config';
 
 export class WebStorage {
 
@@ -6,7 +7,6 @@ export class WebStorage {
 
   constructor(
       protected _storageType: 'sessionStorage' | 'localStorage',
-      protected _prefix = '',
   ) {
     if (this._isSupported()) {
       this._storage = window[this._storageType];
@@ -16,7 +16,7 @@ export class WebStorage {
   }
 
   get(key: string): any {
-    const item = this._storage.getItem(this._deriveKey(key));
+    const item = this._storage.getItem(KeyUtility.compose(key));
     if (item === null) {
       return null;
     }
@@ -28,12 +28,12 @@ export class WebStorage {
       return false;
     }
     typeof value === 'undefined' && (value = null);
-    this._storage.setItem(this._deriveKey(key), JSON.stringify(value));
+    this._storage.setItem(KeyUtility.compose(key), JSON.stringify(value));
     return true;
   }
 
   remove(key: string): boolean {
-    const fullKey = this._deriveKey(key);
+    const fullKey = KeyUtility.compose(key);
     if (this._storage.getItem(fullKey) === null) {
       return false;
     }
@@ -43,8 +43,8 @@ export class WebStorage {
 
   clear(): void {
     for (const key in this._storage) {
-      if (key.startsWith(this._prefix)) {
-        this.remove(key.substring(this._prefix.length));
+      if (KeyUtility.isComposite(key)) {
+        this._storage.removeItem(key);
       }
     }
   }
@@ -53,16 +53,12 @@ export class WebStorage {
     try {
       if (this._storageType in window && window[this._storageType] !== null) {
         const webStorage = window[this._storageType];
-        const key = this._deriveKey('__DUMMY');
+        const key = KeyUtility.compose('__DUMMY');
         webStorage.setItem(key, '');
         webStorage.removeItem(key);
         return true;
       }
     } catch (e) {}
     return false;
-  }
-
-  private _deriveKey(key: string): string {
-    return `${this._prefix}${key}`;
   }
 }

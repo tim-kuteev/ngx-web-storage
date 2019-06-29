@@ -9,9 +9,8 @@ export class WebStorageController extends WebStorage {
 
   constructor(
       storageType: 'sessionStorage' | 'localStorage',
-      prefix = '',
   ) {
-    super(storageType, prefix);
+    super(storageType);
   }
 
   get actions(): Observable<WebStorageItemAction> {

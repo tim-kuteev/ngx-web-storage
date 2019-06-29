@@ -1,7 +1,6 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { merge, Observable } from 'rxjs';
 import { WebStorageController } from './web-storage.controller';
-import { WEB_STORAGE_CONFIG, WebStorageConfig } from '../web-storage.config';
 
 export interface WebStorageItemAction {
   action: string;
@@ -15,11 +14,9 @@ export class WebStorageService {
   private _session: WebStorageController;
   private _local: WebStorageController;
 
-  constructor(
-      @Inject(WEB_STORAGE_CONFIG) private _config: WebStorageConfig,
-  ) {
-    this._session = new WebStorageController('sessionStorage', this._config.prefix);
-    this._local = new WebStorageController('localStorage', this._config.prefix);
+  constructor() {
+    this._session = new WebStorageController('sessionStorage');
+    this._local = new WebStorageController('localStorage');
   }
 
   get session(): WebStorageController {
