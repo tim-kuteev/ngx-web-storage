@@ -4,6 +4,7 @@ export interface WebStorageConfig {
   prefix: string;
 }
 
+// @dynamic
 export class ConfigManager {
 
   private static _config = WEB_STORAGE_DEFAULT_CONFIG;

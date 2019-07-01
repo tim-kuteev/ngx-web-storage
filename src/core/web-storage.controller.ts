@@ -7,12 +7,6 @@ export class WebStorageController extends WebStorage {
   private _actions: Subject<WebStorageItemAction> = new Subject<WebStorageItemAction>();
   private _errors: Subject<any> = new Subject<any>();
 
-  constructor(
-      storageType: 'sessionStorage' | 'localStorage',
-  ) {
-    super(storageType);
-  }
-
   get actions(): Observable<WebStorageItemAction> {
     return this._actions.asObservable();
   }
@@ -34,11 +28,7 @@ export class WebStorageController extends WebStorage {
     try {
       const success = super.set(key, value);
       if (success) {
-        this._actions.next({
-          action: 'set',
-          key: key,
-          value: value,
-        });
+        this._notify('set', key, value);
       }
     } catch (e) {
       this._errors.next(e);
@@ -51,10 +41,7 @@ export class WebStorageController extends WebStorage {
     try {
       const success = super.remove(key);
       if (success) {
-        this._actions.next({
-          action: 'remove',
-          key: key,
-        });
+        this._notify('remove', key);
       }
     } catch (e) {
       this._errors.next(e);
@@ -69,5 +56,14 @@ export class WebStorageController extends WebStorage {
     } catch (e) {
       this._errors.next(e);
     }
+  }
+
+  private _notify(action: 'set' | 'remove', key: string, value?: any): void {
+    this._actions.next({
+      type: this._storageType,
+      action: action,
+      key: key,
+      value: value,
+    });
   }
 }

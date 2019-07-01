@@ -3,7 +3,8 @@ import { merge, Observable } from 'rxjs';
 import { WebStorageController } from './web-storage.controller';
 
 export interface WebStorageItemAction {
-  action: string;
+  type: 'sessionStorage' | 'localStorage',
+  action: 'set' | 'remove';
   key: string;
   value?: any;
 }

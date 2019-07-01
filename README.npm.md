@@ -1,6 +1,6 @@
-# Angular2+ Web Storage
+# Angular Web Storage
 
-It's a simple library for Angular applications which provides the easy way to store data in web storage.
+It's a simple library for Angular applications which provides the easy way to use web storage.
 
 See instruction on [GitHub Repository](https://github.com/tim-kuteev/ngx-web-storage)
 
