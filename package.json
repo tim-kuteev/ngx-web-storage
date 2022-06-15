@@ -4,7 +4,7 @@
     "@angular/common": "^7.0.0",
     "@angular/compiler": "^7.0.0",
     "@angular/compiler-cli": "^7.0.0",
-    "@angular/core": "^7.0.0",
+    "@angular/core": "^11.0.5",
     "@angular/platform-browser": "^7.0.0",
     "rimraf": "^2.6.3",
     "rxjs": "^6.5.0",
